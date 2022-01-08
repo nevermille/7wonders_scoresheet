@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<head>
+    <script src="jquery-3.6.0.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: Roboto, system-ui;
+        }
+    </style>
+    <script>
+        function updateScore() {
+            for (var i = 1; i <= 1; ++i) {
+                $("#player" + i + "_science").val(joker($("#player" + i + "_tablet").val(), $("#player" + i + "_gear").val(), $("#player" + i + "_compass").val(), $("#player" + i + "_joker").val())[0]);
+                $("#player" + i + "_moneyPts").val(Math.floor($("#player" + i + "_money").val() / 3));
+                sum = 0;
+                $.each(["moneyPts", "wonder", "military", "civic", "commerce", "science", "guild", "leaders"], function( index, value ) {
+                    sum += parseInt($("#player" + i + "_" + value).val()) || 0;
+                });
+                $("#player" + i + "_points").val(sum);
+            }
+        }
+        function clearGrid() {
+            for (var i = 1; i <= 1; ++i) {
+                $.each(["money", "tablet", "gear", "compass", "joker", "wonder", "military", "civic", "commerce", "guild", "leaders"], function( index, value ) {
+                    $("#player" + i + "_" + value).val("");
+                });
+            }
+            updateScore();
+        }
+        $(document).on('input', function() {
+            //alert("test");
+            updateScore();
+        });
+        function science($tablet, $gear, $compass) {
+            family = Math.min($tablet, $gear, $compass) * 7;
+            sum = $tablet * $tablet + $gear * $gear + $compass * $compass;
+            return family + sum;
+        }
+        function joker($tablet, $gear, $compass, $joker) {
+            $tablet = parseInt($tablet) || 0;
+            $gear = parseInt($gear) || 0;
+            $compass = parseInt($compass) || 0;
+            $joker = parseInt($joker) || 0;
+            max = [0, 0, 0, 0];
+            for (var i = 0; i <= $joker; ++i) {
+                for (var j = 0; j <= $joker - i; ++j) {
+                    result = science($tablet + i, $gear + j, $compass + $joker - i - j);
+                    console.log($tablet + i, $gear + j, $compass + $joker - i - j, result);
+                    if (result > max[0]) {
+                        max[0] = result;
+                        max[1] = i;
+                        max[2] = j;
+                        max[3] = $joker - i - j;
+                    }
+                }
+            }
+            return max;
+        }
+    </script>
+    <title>7 Wonders - Score Sheet</title>
+</head>
+<body>
+    <fieldset>
+        <legend>Extensions</legend>
+        <input type="checkbox" name="cities">
+        <label for="cities">Cities Extension</label>
+        <input type="checkbox" name="leaders">
+        <label for="leaders">Leaders Extension</label>
+    </fieldset>
+    <fieldset>
+        <legend>Utils</legend>
+        <button id="clearButton" onclick="clearGrid()">Clear</button>
+        <button id="shuffleButton" onclick="shuffle()">Shuffle Wonders</button>
+    </fieldset>
+    <table border="1">
+        <tr>
+            <td colspan="2">
+                Player's Info
+            </td>
+            <td>
+                Money
+            </td>
+            <td colspan="4">
+                Science
+            </td>
+            <td colspan="8">
+                Points
+            </td>
+            <td colspan="2">
+                Results
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Name
+            </td>
+            <td>
+                Wonder
+            </td>
+            <td>
+                Coins
+            </td>
+            <td>
+                Tablet
+            </td>
+            <td>
+                Gear
+            </td>
+            <td>
+                Compass
+            </td>
+            <td>
+                Joker
+            </td>
+            <td>
+                Money
+            </td>
+            <td>
+                Wonder
+            </td>
+            <td>
+                Military
+            </td>
+            <td>
+                Civic
+            </td>
+            <td>
+                Commerce
+            </td>
+            <td>
+                Science
+            </td>
+            <td>
+                Guild
+            </td>
+            <td class="leaders-exclusive">
+                Leaders
+            </td>
+            <td>
+                Points
+            </td>
+            <td>
+                Rank
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" name="player1_name" id="player1_name">
+            </td>
+            <td>
+                <select name="player1_board" id="player1_board">
+                    <option value="Alexandria">Alexandria</option>
+                    <option value="Babylon">Babylon</option>
+                    <option value="Giza">Giza</option>
+                    <option value="Halikarnassos">Halikarnassos</option>
+                    <option value="Olympia">Olympia</option>
+                    <option value="Rhodos">Rhodos</option>
+                    <option class="leaders-exclusive" value="Roma">Roma</option>
+                    <option class="leaders-exclusive" value="Abu Simbel">Abu Simbel</option>
+                </select>
+            </td>
+            <td>
+                <input type="number" name="player1_money" id="player1_money" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_tablet" id="player1_tablet" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_gear" id="player1_gear" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_compass" id="player1_compass" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_joker" id="player1_joker" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_moneyPts" id="player1_moneyPts" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_wonder" id="player1_wonder" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_military" id="player1_military" min="-6" max="18">
+            </td>
+            <td>
+                <input type="number" name="player1_civic" id="player1_civic" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_commerce" id="player1_commerce" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_science" id="player1_science" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_guild" id="player1_guild" min="0" max="999">
+            </td>
+            <td class="leaders-exclusive">
+                <input type="number" name="player1_leaders" id="player1_leaders" class="leaders-exclusive" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_points" id="player1_points" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player1_rank" id="player1_rank" disabled min=-99 max="9">
+            </td>
+        </tr>
+    </table>
+</body>
