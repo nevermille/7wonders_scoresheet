@@ -8,14 +8,26 @@
         * {
             font-family: Roboto, system-ui;
         }
+        .leaders-exclusive {
+            display: none;
+        }
+        .cities-exclusive {
+            display: none;
+        }
+        .armada-exclusive {
+            display: none;
+        }
     </style>
     <script>
         function updateScore() {
             for (var i = 1; i <= 1; ++i) {
+                if (parseInt($("#player" + i + "_joker").val()) > 10) {
+                    $("#player" + i + "_joker").val(10);
+                }
                 $("#player" + i + "_science").val(joker($("#player" + i + "_tablet").val(), $("#player" + i + "_gear").val(), $("#player" + i + "_compass").val(), $("#player" + i + "_joker").val())[0]);
                 $("#player" + i + "_moneyPts").val(Math.floor($("#player" + i + "_money").val() / 3));
                 sum = 0;
-                $.each(["moneyPts", "wonder", "military", "civic", "commerce", "science", "guild", "leaders"], function( index, value ) {
+                $.each(["moneyPts", "wonder", "military", "civic", "commerce", "science", "guild", "leaders", "cities", "conflicts", "island"], function( index, value ) {
                     sum += parseInt($("#player" + i + "_" + value).val()) || 0;
                 });
                 $("#player" + i + "_points").val(sum);
@@ -23,11 +35,22 @@
         }
         function clearGrid() {
             for (var i = 1; i <= 1; ++i) {
-                $.each(["money", "tablet", "gear", "compass", "joker", "wonder", "military", "civic", "commerce", "guild", "leaders"], function( index, value ) {
-                    $("#player" + i + "_" + value).val("");
+                $.each(["money", "tablet", "gear", "compass", "joker", "wonder", "military", "civic", "commerce", "guild", "leaders", "cities", "conflicts", "island"], function( index, value ) {
+                    $("#player" + i + "_" + value).val(0);
                 });
             }
             updateScore();
+        }
+        function toggle($extension, $col) {
+            if ($("#" + $extension + "Ext").val() == "false") {
+                $("#" + $extension + "Ext").val("true");
+                $("#ptsCol").attr("colspan", parseInt($("#ptsCol").attr("colspan")) + $col);
+                $("." + $extension + "-exclusive").show();
+            } else {
+                $("#" + $extension + "Ext").val("false");
+                $("#ptsCol").attr("colspan", parseInt($("#ptsCol").attr("colspan")) - $col);
+                $("." + $extension + "-exclusive").hide();
+            }
         }
         $(document).on('input', function() {
             //alert("test");
@@ -58,16 +81,22 @@
             }
             return max;
         }
+        clearGrid();
     </script>
     <title>7 Wonders - Score Sheet</title>
 </head>
 <body>
+    <input type="hidden" name="leadersExt" id="leadersExt" value="false">
+    <input type="hidden" name="citiesExt" id="citiesExt" value="false">
+    <input type="hidden" name="armadaExt" id="armadaExt" value="false">
     <fieldset>
         <legend>Extensions</legend>
-        <input type="checkbox" name="cities">
-        <label for="cities">Cities Extension</label>
-        <input type="checkbox" name="leaders">
+        <input type="checkbox" onclick="toggle('leaders', 1)" name="leaders">
         <label for="leaders">Leaders Extension</label>
+        <input type="checkbox" onclick="toggle('cities', 1)" name="cities">
+        <label for="cities">Cities Extension</label>
+        <input type="checkbox" onclick="toggle('armada', 2)" name="armada">
+        <label for="armada">Armada Extension</label>
     </fieldset>
     <fieldset>
         <legend>Utils</legend>
@@ -85,7 +114,7 @@
             <td colspan="4">
                 Science
             </td>
-            <td colspan="8">
+            <td id="ptsCol" colspan="7">
                 Points
             </td>
             <td colspan="2">
@@ -138,6 +167,15 @@
             <td class="leaders-exclusive">
                 Leaders
             </td>
+            <td class="cities-exclusive">
+                Cities
+            </td>
+            <td class="armada-exclusive">
+                Naval Conflicts
+            </td>
+            <td class="armada-exclusive">
+                Island
+            </td>
             <td>
                 Points
             </td>
@@ -159,10 +197,13 @@
                     <option value="Rhodos">Rhodos</option>
                     <option class="leaders-exclusive" value="Roma">Roma</option>
                     <option class="leaders-exclusive" value="Abu Simbel">Abu Simbel</option>
+                    <option class="cities-exclusive" value="Byzantium">Byzantium</option>
+                    <option class="cities-exclusive" value="Petra">Petra</option>
+                    <option class="armada-exclusive" value="Siracusa">Siracusa</option>
                 </select>
             </td>
             <td>
-                <input type="number" name="player1_money" id="player1_money" min="0" max="999">
+                <input type="number" name="player1_money" id="player1_money" min="-99" max="999">
             </td>
             <td>
                 <input type="number" name="player1_tablet" id="player1_tablet" min="0" max="999">
@@ -199,6 +240,15 @@
             </td>
             <td class="leaders-exclusive">
                 <input type="number" name="player1_leaders" id="player1_leaders" class="leaders-exclusive" min="0" max="999">
+            </td>
+            <td class="cities-exclusive">
+                <input type="number" name="player1_cities" id="player1_cities" class="cities-exclusive" min="0" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player1_conflicts" id="player1_conflicts" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player1_island" id="player1_island" class="armada-exclusive" min="-99" max="999">
             </td>
             <td>
                 <input type="number" name="player1_points" id="player1_points" disabled min=-99 max="999">
