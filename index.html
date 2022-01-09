@@ -18,71 +18,6 @@
             display: none;
         }
     </style>
-    <script>
-        function updateScore() {
-            for (var i = 1; i <= 1; ++i) {
-                if (parseInt($("#player" + i + "_joker").val()) > 10) {
-                    $("#player" + i + "_joker").val(10);
-                }
-                $("#player" + i + "_science").val(joker($("#player" + i + "_tablet").val(), $("#player" + i + "_gear").val(), $("#player" + i + "_compass").val(), $("#player" + i + "_joker").val())[0]);
-                $("#player" + i + "_moneyPts").val(Math.floor($("#player" + i + "_money").val() / 3));
-                sum = 0;
-                $.each(["moneyPts", "wonder", "military", "civic", "commerce", "science", "guild", "leaders", "cities", "conflicts", "island"], function( index, value ) {
-                    sum += parseInt($("#player" + i + "_" + value).val()) || 0;
-                });
-                $("#player" + i + "_points").val(sum);
-            }
-        }
-        function clearGrid() {
-            for (var i = 1; i <= 1; ++i) {
-                $.each(["money", "tablet", "gear", "compass", "joker", "wonder", "military", "civic", "commerce", "guild", "leaders", "cities", "conflicts", "island"], function( index, value ) {
-                    $("#player" + i + "_" + value).val(0);
-                });
-            }
-            updateScore();
-        }
-        function toggle($extension, $col) {
-            if ($("#" + $extension + "Ext").val() == "false") {
-                $("#" + $extension + "Ext").val("true");
-                $("#ptsCol").attr("colspan", parseInt($("#ptsCol").attr("colspan")) + $col);
-                $("." + $extension + "-exclusive").show();
-            } else {
-                $("#" + $extension + "Ext").val("false");
-                $("#ptsCol").attr("colspan", parseInt($("#ptsCol").attr("colspan")) - $col);
-                $("." + $extension + "-exclusive").hide();
-            }
-        }
-        $(document).on('input', function() {
-            //alert("test");
-            updateScore();
-        });
-        function science($tablet, $gear, $compass) {
-            family = Math.min($tablet, $gear, $compass) * 7;
-            sum = $tablet * $tablet + $gear * $gear + $compass * $compass;
-            return family + sum;
-        }
-        function joker($tablet, $gear, $compass, $joker) {
-            $tablet = parseInt($tablet) || 0;
-            $gear = parseInt($gear) || 0;
-            $compass = parseInt($compass) || 0;
-            $joker = parseInt($joker) || 0;
-            max = [0, 0, 0, 0];
-            for (var i = 0; i <= $joker; ++i) {
-                for (var j = 0; j <= $joker - i; ++j) {
-                    result = science($tablet + i, $gear + j, $compass + $joker - i - j);
-                    console.log($tablet + i, $gear + j, $compass + $joker - i - j, result);
-                    if (result > max[0]) {
-                        max[0] = result;
-                        max[1] = i;
-                        max[2] = j;
-                        max[3] = $joker - i - j;
-                    }
-                }
-            }
-            return max;
-        }
-        clearGrid();
-    </script>
     <title>7 Wonders - Score Sheet</title>
 </head>
 <body>
@@ -258,4 +193,73 @@
             </td>
         </tr>
     </table>
+    <script>
+        function updateScore() {
+            for (var i = 1; i <= 1; ++i) {
+                if (parseInt($("#player" + i + "_joker").val()) > 10) {
+                    $("#player" + i + "_joker").val(10);
+                }
+                $("#player" + i + "_science").val(joker($("#player" + i + "_tablet").val(), $("#player" + i + "_gear").val(), $("#player" + i + "_compass").val(), $("#player" + i + "_joker").val())[0]);
+                $("#player" + i + "_moneyPts").val(Math.floor($("#player" + i + "_money").val() / 3));
+                sum = 0;
+                $.each(["moneyPts", "wonder", "military", "civic", "commerce", "science", "guild", "leaders", "cities", "conflicts", "island"], function( index, value ) {
+                    sum += parseInt($("#player" + i + "_" + value).val()) || 0;
+                });
+                $("#player" + i + "_points").val(sum);
+            }
+        }
+        function clearGrid() {
+            for (var i = 1; i <= 1; ++i) {
+                $.each(["money", "tablet", "gear", "compass", "joker", "wonder", "military", "civic", "commerce", "guild", "leaders", "cities", "conflicts", "island"], function( index, value ) {
+                    $("#player" + i + "_" + value).val(0);
+                });
+            }
+            updateScore();
+        }
+        function toggle($extension, $col) {
+            if ($("#" + $extension + "Ext").val() == "false") {
+                $("#" + $extension + "Ext").val("true");
+                $("#ptsCol").attr("colspan", parseInt($("#ptsCol").attr("colspan")) + $col);
+                $("." + $extension + "-exclusive").show();
+            } else {
+                $("#" + $extension + "Ext").val("false");
+                $("#ptsCol").attr("colspan", parseInt($("#ptsCol").attr("colspan")) - $col);
+                $("." + $extension + "-exclusive").hide();
+            }
+        }
+        $("input").not("#players").on("input", function() {
+            //alert("test");
+            updateScore();
+        });
+        $("#players").on("input", function() {
+            
+            updateScore();
+        });
+        function science($tablet, $gear, $compass) {
+            family = Math.min($tablet, $gear, $compass) * 7;
+            sum = $tablet * $tablet + $gear * $gear + $compass * $compass;
+            return family + sum;
+        }
+        function joker($tablet, $gear, $compass, $joker) {
+            $tablet = parseInt($tablet) || 0;
+            $gear = parseInt($gear) || 0;
+            $compass = parseInt($compass) || 0;
+            $joker = parseInt($joker) || 0;
+            max = [0, 0, 0, 0];
+            for (var i = 0; i <= $joker; ++i) {
+                for (var j = 0; j <= $joker - i; ++j) {
+                    result = science($tablet + i, $gear + j, $compass + $joker - i - j);
+                    console.log($tablet + i, $gear + j, $compass + $joker - i - j, result);
+                    if (result > max[0]) {
+                        max[0] = result;
+                        max[1] = i;
+                        max[2] = j;
+                        max[3] = $joker - i - j;
+                    }
+                }
+            }
+            return max;
+        }
+        clearGrid();
+    </script>
 </body>
