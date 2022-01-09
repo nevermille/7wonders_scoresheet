@@ -8,71 +8,31 @@
         * {
             font-family: Roboto, system-ui;
         }
+        .hidden {
+            display: none;
+        }
     </style>
-    <script>
-        function updateScore() {
-            for (var i = 1; i <= 1; ++i) {
-                $("#player" + i + "_science").val(joker($("#player" + i + "_tablet").val(), $("#player" + i + "_gear").val(), $("#player" + i + "_compass").val(), $("#player" + i + "_joker").val())[0]);
-                $("#player" + i + "_moneyPts").val(Math.floor($("#player" + i + "_money").val() / 3));
-                sum = 0;
-                $.each(["moneyPts", "wonder", "military", "civic", "commerce", "science", "guild", "leaders"], function( index, value ) {
-                    sum += parseInt($("#player" + i + "_" + value).val()) || 0;
-                });
-                $("#player" + i + "_points").val(sum);
-            }
-        }
-        function clearGrid() {
-            for (var i = 1; i <= 1; ++i) {
-                $.each(["money", "tablet", "gear", "compass", "joker", "wonder", "military", "civic", "commerce", "guild", "leaders"], function( index, value ) {
-                    $("#player" + i + "_" + value).val("");
-                });
-            }
-            updateScore();
-        }
-        $(document).on('input', function() {
-            //alert("test");
-            updateScore();
-        });
-        function science($tablet, $gear, $compass) {
-            family = Math.min($tablet, $gear, $compass) * 7;
-            sum = $tablet * $tablet + $gear * $gear + $compass * $compass;
-            return family + sum;
-        }
-        function joker($tablet, $gear, $compass, $joker) {
-            $tablet = parseInt($tablet) || 0;
-            $gear = parseInt($gear) || 0;
-            $compass = parseInt($compass) || 0;
-            $joker = parseInt($joker) || 0;
-            max = [0, 0, 0, 0];
-            for (var i = 0; i <= $joker; ++i) {
-                for (var j = 0; j <= $joker - i; ++j) {
-                    result = science($tablet + i, $gear + j, $compass + $joker - i - j);
-                    console.log($tablet + i, $gear + j, $compass + $joker - i - j, result);
-                    if (result > max[0]) {
-                        max[0] = result;
-                        max[1] = i;
-                        max[2] = j;
-                        max[3] = $joker - i - j;
-                    }
-                }
-            }
-            return max;
-        }
-    </script>
     <title>7 Wonders - Score Sheet</title>
 </head>
 <body>
+    <input type="hidden" name="leadersExt" id="leadersExt" value="false">
+    <input type="hidden" name="citiesExt" id="citiesExt" value="false">
+    <input type="hidden" name="armadaExt" id="armadaExt" value="false">
     <fieldset>
         <legend>Extensions</legend>
-        <input type="checkbox" name="cities">
-        <label for="cities">Cities Extension</label>
-        <input type="checkbox" name="leaders">
+        <input type="checkbox" onclick="toggle('leaders', 1)" name="leaders">
         <label for="leaders">Leaders Extension</label>
+        <input type="checkbox" onclick="toggle('cities', 1)" name="cities">
+        <label for="cities">Cities Extension</label>
+        <input type="checkbox" onclick="toggle('armada', 2)" name="armada">
+        <label for="armada">Armada Extension</label>
     </fieldset>
     <fieldset>
         <legend>Utils</legend>
         <button id="clearButton" onclick="clearGrid()">Clear</button>
         <button id="shuffleButton" onclick="shuffle()">Shuffle Wonders</button>
+        <label for="players">Players : </label>
+        <input type="number" name="players" id="players" min=3 max=7 value=7>
     </fieldset>
     <table border="1">
         <tr>
@@ -85,7 +45,7 @@
             <td colspan="4">
                 Science
             </td>
-            <td colspan="8">
+            <td id="ptsCol" colspan="7">
                 Points
             </td>
             <td colspan="2">
@@ -138,6 +98,15 @@
             <td class="leaders-exclusive">
                 Leaders
             </td>
+            <td class="cities-exclusive">
+                Cities
+            </td>
+            <td class="armada-exclusive">
+                Naval Conflicts
+            </td>
+            <td class="armada-exclusive">
+                Island
+            </td>
             <td>
                 Points
             </td>
@@ -145,24 +114,29 @@
                 Rank
             </td>
         </tr>
-        <tr>
+        <tr id="player1_row">
             <td>
                 <input type="text" name="player1_name" id="player1_name">
             </td>
             <td>
                 <select name="player1_board" id="player1_board">
+                    <option class="useless" value="none">Choose</option>
                     <option value="Alexandria">Alexandria</option>
                     <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
                     <option value="Giza">Giza</option>
                     <option value="Halikarnassos">Halikarnassos</option>
                     <option value="Olympia">Olympia</option>
                     <option value="Rhodos">Rhodos</option>
                     <option class="leaders-exclusive" value="Roma">Roma</option>
                     <option class="leaders-exclusive" value="Abu Simbel">Abu Simbel</option>
+                    <option class="cities-exclusive" value="Byzantium">Byzantium</option>
+                    <option class="cities-exclusive" value="Petra">Petra</option>
+                    <option class="armada-exclusive" value="Siracusa">Siracusa</option>
                 </select>
             </td>
             <td>
-                <input type="number" name="player1_money" id="player1_money" min="0" max="999">
+                <input type="number" name="player1_money" id="player1_money" min="-99" max="999">
             </td>
             <td>
                 <input type="number" name="player1_tablet" id="player1_tablet" min="0" max="999">
@@ -200,6 +174,15 @@
             <td class="leaders-exclusive">
                 <input type="number" name="player1_leaders" id="player1_leaders" class="leaders-exclusive" min="0" max="999">
             </td>
+            <td class="cities-exclusive">
+                <input type="number" name="player1_cities" id="player1_cities" class="cities-exclusive" min="0" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player1_conflicts" id="player1_conflicts" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player1_island" id="player1_island" class="armada-exclusive" min="-99" max="999">
+            </td>
             <td>
                 <input type="number" name="player1_points" id="player1_points" disabled min=-99 max="999">
             </td>
@@ -207,5 +190,558 @@
                 <input type="number" name="player1_rank" id="player1_rank" disabled min=-99 max="9">
             </td>
         </tr>
+        <tr id="player2_row">
+            <td>
+                <input type="text" name="player2_name" id="player2_name">
+            </td>
+            <td>
+                <select name="player2_board" id="player2_board">
+                    <option value="none">Choose</option>
+                    <option value="Alexandria">Alexandria</option>
+                    <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
+                    <option value="Giza">Giza</option>
+                    <option value="Halikarnassos">Halikarnassos</option>
+                    <option value="Olympia">Olympia</option>
+                    <option value="Rhodos">Rhodos</option>
+                    <option class="leaders-exclusive" value="Roma">Roma</option>
+                    <option class="leaders-exclusive" value="Abu Simbel">Abu Simbel</option>
+                    <option class="cities-exclusive" value="Byzantium">Byzantium</option>
+                    <option class="cities-exclusive" value="Petra">Petra</option>
+                    <option class="armada-exclusive" value="Siracusa">Siracusa</option>
+                </select>
+            </td>
+            <td>
+                <input type="number" name="player2_money" id="player2_money" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_tablet" id="player2_tablet" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_gear" id="player2_gear" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_compass" id="player2_compass" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_joker" id="player2_joker" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_moneyPts" id="player2_moneyPts" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_wonder" id="player2_wonder" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_military" id="player2_military" min="-6" max="18">
+            </td>
+            <td>
+                <input type="number" name="player2_civic" id="player2_civic" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_commerce" id="player2_commerce" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_science" id="player2_science" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_guild" id="player2_guild" min="0" max="999">
+            </td>
+            <td class="leaders-exclusive">
+                <input type="number" name="player2_leaders" id="player2_leaders" class="leaders-exclusive" min="0" max="999">
+            </td>
+            <td class="cities-exclusive">
+                <input type="number" name="player2_cities" id="player2_cities" class="cities-exclusive" min="0" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player2_conflicts" id="player2_conflicts" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player2_island" id="player2_island" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_points" id="player2_points" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player2_rank" id="player2_rank" disabled min=-99 max="9">
+            </td>
+        </tr>
+        <tr id="player3_row">
+            <td>
+                <input type="text" name="player3_name" id="player3_name">
+            </td>
+            <td>
+                <select name="player3_board" id="player3_board">
+                    <option value="none">Choose</option>
+                    <option value="Alexandria">Alexandria</option>
+                    <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
+                    <option value="Giza">Giza</option>
+                    <option value="Halikarnassos">Halikarnassos</option>
+                    <option value="Olympia">Olympia</option>
+                    <option value="Rhodos">Rhodos</option>
+                    <option class="leaders-exclusive" value="Roma">Roma</option>
+                    <option class="leaders-exclusive" value="Abu Simbel">Abu Simbel</option>
+                    <option class="cities-exclusive" value="Byzantium">Byzantium</option>
+                    <option class="cities-exclusive" value="Petra">Petra</option>
+                    <option class="armada-exclusive" value="Siracusa">Siracusa</option>
+                </select>
+            </td>
+            <td>
+                <input type="number" name="player3_money" id="player3_money" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_tablet" id="player3_tablet" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_gear" id="player3_gear" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_compass" id="player3_compass" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_joker" id="player3_joker" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_moneyPts" id="player3_moneyPts" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_wonder" id="player3_wonder" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_military" id="player3_military" min="-6" max="18">
+            </td>
+            <td>
+                <input type="number" name="player3_civic" id="player3_civic" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_commerce" id="player3_commerce" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_science" id="player3_science" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_guild" id="player3_guild" min="0" max="999">
+            </td>
+            <td class="leaders-exclusive">
+                <input type="number" name="player3_leaders" id="player3_leaders" class="leaders-exclusive" min="0" max="999">
+            </td>
+            <td class="cities-exclusive">
+                <input type="number" name="player3_cities" id="player3_cities" class="cities-exclusive" min="0" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player3_conflicts" id="player3_conflicts" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player3_island" id="player3_island" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_points" id="player3_points" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player3_rank" id="player3_rank" disabled min=-99 max="9">
+            </td>
+        </tr>
+        <tr id="player4_row">
+            <td>
+                <input type="text" name="player4_name" id="player4_name">
+            </td>
+            <td>
+                <select name="player4_board" id="player4_board">
+                    <option value="none">Choose</option>
+                    <option value="Alexandria">Alexandria</option>
+                    <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
+                    <option value="Giza">Giza</option>
+                    <option value="Halikarnassos">Halikarnassos</option>
+                    <option value="Olympia">Olympia</option>
+                    <option value="Rhodos">Rhodos</option>
+                    <option class="leaders-exclusive" value="Roma">Roma</option>
+                    <option class="leaders-exclusive" value="Abu Simbel">Abu Simbel</option>
+                    <option class="cities-exclusive" value="Byzantium">Byzantium</option>
+                    <option class="cities-exclusive" value="Petra">Petra</option>
+                    <option class="armada-exclusive" value="Siracusa">Siracusa</option>
+                </select>
+            </td>
+            <td>
+                <input type="number" name="player4_money" id="player4_money" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_tablet" id="player4_tablet" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_gear" id="player4_gear" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_compass" id="player4_compass" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_joker" id="player4_joker" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_moneyPts" id="player4_moneyPts" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_wonder" id="player4_wonder" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_military" id="player4_military" min="-6" max="18">
+            </td>
+            <td>
+                <input type="number" name="player4_civic" id="player4_civic" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_commerce" id="player4_commerce" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_science" id="player4_science" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_guild" id="player4_guild" min="0" max="999">
+            </td>
+            <td class="leaders-exclusive">
+                <input type="number" name="player4_leaders" id="player4_leaders" class="leaders-exclusive" min="0" max="999">
+            </td>
+            <td class="cities-exclusive">
+                <input type="number" name="player4_cities" id="player4_cities" class="cities-exclusive" min="0" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player4_conflicts" id="player4_conflicts" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player4_island" id="player4_island" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_points" id="player4_points" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player4_rank" id="player4_rank" disabled min=-99 max="9">
+            </td>
+        </tr>
+        <tr id="player5_row">
+            <td>
+                <input type="text" name="player5_name" id="player5_name">
+            </td>
+            <td>
+                <select name="player5_board" id="player5_board">
+                    <option value="none">Choose</option>
+                    <option value="Alexandria">Alexandria</option>
+                    <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
+                    <option value="Giza">Giza</option>
+                    <option value="Halikarnassos">Halikarnassos</option>
+                    <option value="Olympia">Olympia</option>
+                    <option value="Rhodos">Rhodos</option>
+                    <option class="leaders-exclusive" value="Roma">Roma</option>
+                    <option class="leaders-exclusive" value="Abu Simbel">Abu Simbel</option>
+                    <option class="cities-exclusive" value="Byzantium">Byzantium</option>
+                    <option class="cities-exclusive" value="Petra">Petra</option>
+                    <option class="armada-exclusive" value="Siracusa">Siracusa</option>
+                </select>
+            </td>
+            <td>
+                <input type="number" name="player5_money" id="player5_money" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_tablet" id="player5_tablet" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_gear" id="player5_gear" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_compass" id="player5_compass" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_joker" id="player5_joker" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_moneyPts" id="player5_moneyPts" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_wonder" id="player5_wonder" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_military" id="player5_military" min="-6" max="18">
+            </td>
+            <td>
+                <input type="number" name="player5_civic" id="player5_civic" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_commerce" id="player5_commerce" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_science" id="player5_science" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_guild" id="player5_guild" min="0" max="999">
+            </td>
+            <td class="leaders-exclusive">
+                <input type="number" name="player5_leaders" id="player5_leaders" class="leaders-exclusive" min="0" max="999">
+            </td>
+            <td class="cities-exclusive">
+                <input type="number" name="player5_cities" id="player5_cities" class="cities-exclusive" min="0" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player5_conflicts" id="player5_conflicts" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player5_island" id="player5_island" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_points" id="player5_points" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player5_rank" id="player5_rank" disabled min=-99 max="9">
+            </td>
+        </tr>
+        <tr id="player6_row">
+            <td>
+                <input type="text" name="player6_name" id="player6_name">
+            </td>
+            <td>
+                <select name="player6_board" id="player6_board">
+                    <option value="none">Choose</option>
+                    <option value="Alexandria">Alexandria</option>
+                    <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
+                    <option value="Giza">Giza</option>
+                    <option value="Halikarnassos">Halikarnassos</option>
+                    <option value="Olympia">Olympia</option>
+                    <option value="Rhodos">Rhodos</option>
+                    <option class="leaders-exclusive" value="Roma">Roma</option>
+                    <option class="leaders-exclusive" value="Abu Simbel">Abu Simbel</option>
+                    <option class="cities-exclusive" value="Byzantium">Byzantium</option>
+                    <option class="cities-exclusive" value="Petra">Petra</option>
+                    <option class="armada-exclusive" value="Siracusa">Siracusa</option>
+                </select>
+            </td>
+            <td>
+                <input type="number" name="player6_money" id="player6_money" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_tablet" id="player6_tablet" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_gear" id="player6_gear" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_compass" id="player6_compass" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_joker" id="player6_joker" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_moneyPts" id="player6_moneyPts" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_wonder" id="player6_wonder" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_military" id="player6_military" min="-6" max="18">
+            </td>
+            <td>
+                <input type="number" name="player6_civic" id="player6_civic" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_commerce" id="player6_commerce" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_science" id="player6_science" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_guild" id="player6_guild" min="0" max="999">
+            </td>
+            <td class="leaders-exclusive">
+                <input type="number" name="player6_leaders" id="player6_leaders" class="leaders-exclusive" min="0" max="999">
+            </td>
+            <td class="cities-exclusive">
+                <input type="number" name="player6_cities" id="player6_cities" class="cities-exclusive" min="0" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player6_conflicts" id="player6_conflicts" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player6_island" id="player6_island" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_points" id="player6_points" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player6_rank" id="player6_rank" disabled min=-99 max="9">
+            </td>
+        </tr>
+        <tr id="player7_row">
+            <td>
+                <input type="text" name="player7_name" id="player7_name">
+            </td>
+            <td>
+                <select name="player7_board" id="player7_board">
+                    <option value="none">Choose</option>
+                    <option value="Alexandria">Alexandria</option>
+                    <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
+                    <option value="Giza">Giza</option>
+                    <option value="Halikarnassos">Halikarnassos</option>
+                    <option value="Olympia">Olympia</option>
+                    <option value="Rhodos">Rhodos</option>
+                    <option class="leaders-exclusive" value="Roma">Roma</option>
+                    <option class="leaders-exclusive" value="Abu Simbel">Abu Simbel</option>
+                    <option class="cities-exclusive" value="Byzantium">Byzantium</option>
+                    <option class="cities-exclusive" value="Petra">Petra</option>
+                    <option class="armada-exclusive" value="Siracusa">Siracusa</option>
+                </select>
+            </td>
+            <td>
+                <input type="number" name="player7_money" id="player7_money" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_tablet" id="player7_tablet" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_gear" id="player7_gear" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_compass" id="player7_compass" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_joker" id="player7_joker" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_moneyPts" id="player7_moneyPts" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_wonder" id="player7_wonder" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_military" id="player7_military" min="-6" max="18">
+            </td>
+            <td>
+                <input type="number" name="player7_civic" id="player7_civic" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_commerce" id="player7_commerce" min="0" max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_science" id="player7_science" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_guild" id="player7_guild" min="0" max="999">
+            </td>
+            <td class="leaders-exclusive">
+                <input type="number" name="player7_leaders" id="player7_leaders" class="leaders-exclusive" min="0" max="999">
+            </td>
+            <td class="cities-exclusive">
+                <input type="number" name="player7_cities" id="player7_cities" class="cities-exclusive" min="0" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player7_conflicts" id="player7_conflicts" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td class="armada-exclusive">
+                <input type="number" name="player7_island" id="player7_island" class="armada-exclusive" min="-99" max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_points" id="player7_points" disabled min=-99 max="999">
+            </td>
+            <td>
+                <input type="number" name="player7_rank" id="player7_rank" disabled min=-99 max="9">
+            </td>
+        </tr>
     </table>
+    <script>
+        function updateScore() {
+            for (var i = 1; i <= parseInt($("#players").val()); ++i) {
+                if (parseInt($("#player" + i + "_joker").val()) > 10) {
+                    $("#player" + i + "_joker").val(10);
+                }
+                $("#player" + i + "_science").val(joker($("#player" + i + "_tablet").val(), $("#player" + i + "_gear").val(), $("#player" + i + "_compass").val(), $("#player" + i + "_joker").val())[0]);
+                $("#player" + i + "_moneyPts").val(Math.floor($("#player" + i + "_money").val() / 3));
+                sum = 0;
+                $.each(["moneyPts", "wonder", "military", "civic", "commerce", "science", "guild", "leaders", "cities", "conflicts", "island"], function( index, value ) {
+                    sum += parseInt($("#player" + i + "_" + value).val()) || 0;
+                });
+                $("#player" + i + "_points").val(sum);
+            }
+        }
+        function clearGrid() {
+            for (var i = 1; i <= 7; ++i) {
+                $.each(["money", "tablet", "gear", "compass", "joker", "wonder", "military", "civic", "commerce", "guild", "leaders", "cities", "conflicts", "island"], function( index, value ) {
+                    $("#player" + i + "_" + value).val(0);
+                });
+            }
+            updateScore();
+        }
+        function shuffle() {
+            var optionTexts = [];
+            $("#player1_board option:not(.hidden):not(.useless)").each(function() {
+                optionTexts.push($(this).val());
+            });
+            console.log(optionTexts);
+            for (var i = 1; i <= parseInt($("#players").val()); ++i) {
+                wonder = Math.floor(Math.random() * (optionTexts.length - 1));
+                $("#player" + i + "_board").val(optionTexts[wonder]);
+                optionTexts = $.grep(optionTexts, function(value) { // Remove wonder from list
+                    return value != optionTexts[wonder];
+                });
+            }
+        }
+        function toggle($extension, $col) {
+            if ($("#" + $extension + "Ext").val() == "false") {
+                $("#" + $extension + "Ext").val("true");
+                $("#ptsCol").attr("colspan", parseInt($("#ptsCol").attr("colspan")) + $col);
+                $("." + $extension + "-exclusive").removeClass("hidden");
+            } else {
+                $("#" + $extension + "Ext").val("false");
+                $("#ptsCol").attr("colspan", parseInt($("#ptsCol").attr("colspan")) - $col);
+                $("." + $extension + "-exclusive").addClass("hidden");
+            }
+        }
+        $("input").not("#players").on("input", function() {
+            //alert("test");
+            updateScore();
+        });
+        $("#players").on("input", function() {
+            if (parseInt($("#players").val()) > 7) {
+                $("#players").val(7);
+            } else if (parseInt($("#players").val()) < 3) {
+                $("#players").val(3);
+            }
+            for (var i = 1; i <= 7; ++i) {
+                if (i > parseInt($("#players").val())) {
+                    $("#player" + i + "_row").hide();
+                } else {
+                    $("#player" + i + "_row").show();
+                }
+            }
+            updateScore();
+        });
+        function science($tablet, $gear, $compass) {
+            family = Math.min($tablet, $gear, $compass) * 7;
+            sum = $tablet * $tablet + $gear * $gear + $compass * $compass;
+            return family + sum;
+        }
+        function joker($tablet, $gear, $compass, $joker) {
+            $tablet = parseInt($tablet) || 0;
+            $gear = parseInt($gear) || 0;
+            $compass = parseInt($compass) || 0;
+            $joker = parseInt($joker) || 0;
+            max = [0, 0, 0, 0];
+            for (var i = 0; i <= $joker; ++i) {
+                for (var j = 0; j <= $joker - i; ++j) {
+                    result = science($tablet + i, $gear + j, $compass + $joker - i - j);
+                    console.log($tablet + i, $gear + j, $compass + $joker - i - j, result);
+                    if (result > max[0]) {
+                        max[0] = result;
+                        max[1] = i;
+                        max[2] = j;
+                        max[3] = $joker - i - j;
+                    }
+                }
+            }
+            return max;
+        }
+        clearGrid();
+        $(".leaders-exclusive").addClass("hidden");
+        $(".cities-exclusive").addClass("hidden");
+        $(".armada-exclusive").addClass("hidden");
+    </script>
 </body>
