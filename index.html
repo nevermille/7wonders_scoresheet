@@ -8,13 +8,7 @@
         * {
             font-family: Roboto, system-ui;
         }
-        .leaders-exclusive {
-            display: none;
-        }
-        .cities-exclusive {
-            display: none;
-        }
-        .armada-exclusive {
+        .hidden {
             display: none;
         }
     </style>
@@ -126,8 +120,10 @@
             </td>
             <td>
                 <select name="player1_board" id="player1_board">
+                    <option class="useless" value="none">Choose</option>
                     <option value="Alexandria">Alexandria</option>
                     <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
                     <option value="Giza">Giza</option>
                     <option value="Halikarnassos">Halikarnassos</option>
                     <option value="Olympia">Olympia</option>
@@ -200,8 +196,10 @@
             </td>
             <td>
                 <select name="player2_board" id="player2_board">
+                    <option value="none">Choose</option>
                     <option value="Alexandria">Alexandria</option>
                     <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
                     <option value="Giza">Giza</option>
                     <option value="Halikarnassos">Halikarnassos</option>
                     <option value="Olympia">Olympia</option>
@@ -274,8 +272,10 @@
             </td>
             <td>
                 <select name="player3_board" id="player3_board">
+                    <option value="none">Choose</option>
                     <option value="Alexandria">Alexandria</option>
                     <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
                     <option value="Giza">Giza</option>
                     <option value="Halikarnassos">Halikarnassos</option>
                     <option value="Olympia">Olympia</option>
@@ -348,8 +348,10 @@
             </td>
             <td>
                 <select name="player4_board" id="player4_board">
+                    <option value="none">Choose</option>
                     <option value="Alexandria">Alexandria</option>
                     <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
                     <option value="Giza">Giza</option>
                     <option value="Halikarnassos">Halikarnassos</option>
                     <option value="Olympia">Olympia</option>
@@ -422,8 +424,10 @@
             </td>
             <td>
                 <select name="player5_board" id="player5_board">
+                    <option value="none">Choose</option>
                     <option value="Alexandria">Alexandria</option>
                     <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
                     <option value="Giza">Giza</option>
                     <option value="Halikarnassos">Halikarnassos</option>
                     <option value="Olympia">Olympia</option>
@@ -496,8 +500,10 @@
             </td>
             <td>
                 <select name="player6_board" id="player6_board">
+                    <option value="none">Choose</option>
                     <option value="Alexandria">Alexandria</option>
                     <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
                     <option value="Giza">Giza</option>
                     <option value="Halikarnassos">Halikarnassos</option>
                     <option value="Olympia">Olympia</option>
@@ -570,8 +576,10 @@
             </td>
             <td>
                 <select name="player7_board" id="player7_board">
+                    <option value="none">Choose</option>
                     <option value="Alexandria">Alexandria</option>
                     <option value="Babylon">Babylon</option>
+                    <option value="Ephesos">Ephesos</option>
                     <option value="Giza">Giza</option>
                     <option value="Halikarnassos">Halikarnassos</option>
                     <option value="Olympia">Olympia</option>
@@ -662,15 +670,29 @@
             }
             updateScore();
         }
+        function shuffle() {
+            var optionTexts = [];
+            $("#player1_board option:not(.hidden):not(.useless)").each(function() {
+                optionTexts.push($(this).val());
+            });
+            console.log(optionTexts);
+            for (var i = 1; i <= parseInt($("#players").val()); ++i) {
+                wonder = Math.floor(Math.random() * (optionTexts.length - 1));
+                $("#player" + i + "_board").val(optionTexts[wonder]);
+                optionTexts = $.grep(optionTexts, function(value) { // Remove wonder from list
+                    return value != optionTexts[wonder];
+                });
+            }
+        }
         function toggle($extension, $col) {
             if ($("#" + $extension + "Ext").val() == "false") {
                 $("#" + $extension + "Ext").val("true");
                 $("#ptsCol").attr("colspan", parseInt($("#ptsCol").attr("colspan")) + $col);
-                $("." + $extension + "-exclusive").show();
+                $("." + $extension + "-exclusive").removeClass("hidden");
             } else {
                 $("#" + $extension + "Ext").val("false");
                 $("#ptsCol").attr("colspan", parseInt($("#ptsCol").attr("colspan")) - $col);
-                $("." + $extension + "-exclusive").hide();
+                $("." + $extension + "-exclusive").addClass("hidden");
             }
         }
         $("input").not("#players").on("input", function() {
@@ -718,5 +740,8 @@
             return max;
         }
         clearGrid();
+        $(".leaders-exclusive").addClass("hidden");
+        $(".cities-exclusive").addClass("hidden");
+        $(".armada-exclusive").addClass("hidden");
     </script>
 </body>
